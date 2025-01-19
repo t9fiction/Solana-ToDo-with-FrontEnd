@@ -1,94 +1,170 @@
-# todo
+# Solana Todo dApp
 
-## Getting Started
+A decentralized Todo application built on Solana blockchain using Anchor framework. Users can create tasks, mark them as complete, and manage their todo lists on-chain.
 
-### Prerequisites
+## Features
 
-- Node v18.18.0 or higher
+- Create todo tasks with name and description
+- Mark tasks as complete
+- Unique task names
+- Maximum 10 tasks per user
+- Secure ownership validation
+- On-chain storage
 
-- Rust v1.77.2 or higher
-- Anchor CLI 0.30.1 or higher
-- Solana CLI 1.18.17 or higher
+## Prerequisites
 
-### Installation
+- Node.js 14+ and npm
+- Rust and Cargo
+- Solana CLI tools
+- Anchor Framework
+- Phantom Wallet (or other Solana wallet)
 
-#### Clone the repo
+## Installation
 
-```shell
-git clone <repo-url>
-cd <repo-name>
+1. Clone the repository
+```bash
+npx create-solana-dapp todo
+cd todo
 ```
 
-#### Install Dependencies
-
-```shell
-pnpm install
+2. Install dependencies
+```bash
+npm install
 ```
 
-#### Start the web app
-
-```
-pnpm dev
-```
-
-## Apps
-
-### anchor
-
-This is a Solana program written in Rust using the Anchor framework.
-
-#### Commands
-
-You can use any normal anchor commands. Either move to the `anchor` directory and run the `anchor` command or prefix the command with `pnpm`, eg: `pnpm anchor`.
-
-#### Sync the program id:
-
-Running this command will create a new keypair in the `anchor/target/deploy` directory and save the address to the Anchor config file and update the `declare_id!` macro in the `./src/lib.rs` file of the program.
-
-You will manually need to update the constant in `anchor/lib/counter-exports.ts` to match the new program id.
-
-```shell
-pnpm anchor keys sync
+3. Build the program
+```bash
+anchor build
 ```
 
-#### Build the program:
-
-```shell
-pnpm anchor-build
+4. Get the program ID and update it in `lib.rs` and `Anchor.toml`:
+```bash
+solana address -k target/deploy/todo-keypair.json
 ```
 
-#### Start the test validator with the program deployed:
+Replace the program ID in:
+- `programs/todo/src/lib.rs`: `declare_id!("your-program-id")`
+- `Anchor.toml`: `todo = "your-program-id"`
 
-```shell
-pnpm anchor-localnet
+## Project Structure
+
+```
+todo/
+├── app/          # Next.js frontend
+│   ├── components/
+│   ├── pages/
+│   └── package.json
+│
+├── anchor/       # Solana program
+│   └── programs/     # Solana program
+│       └── todo/
+│           └── src/
+│               └── lib.rs
+│   └── Anchor.toml
 ```
 
-#### Run the tests
+## Program Constraints
 
-```shell
-pnpm anchor-test
+- Task name: 4-20 characters
+- Task description: maximum 180 characters
+- Maximum 10 tasks per user
+- Minimum 0.0001 SOL required for initialization
+
+## Development
+
+1. Start local validator:
+```bash
+solana-test-validator
 ```
 
-#### Deploy to Devnet
-
-```shell
-pnpm anchor deploy --provider.cluster devnet
+2. Deploy the program:
+```bash
+anchor deploy
 ```
 
-### web
-
-This is a React app that uses the Anchor generated client to interact with the Solana program.
-
-#### Commands
-
-Start the web app
-
-```shell
-pnpm dev
+3. Start the frontend:
+```bash
+cd app
+npm run dev
 ```
 
-Build the web app
+## Testing
 
-```shell
-pnpm build
+Run the test suite:
+```bash
+anchor test
 ```
+
+## Frontend Development
+
+The frontend is built with Next.js and includes:
+- Wallet connection
+- Task creation form
+- Task list display
+- Task completion functionality
+
+To modify the frontend:
+1. Navigate to `app/` directory
+2. Install dependencies: `npm install`
+3. Run development server: `npm run dev`
+4. Access at: `http://localhost:3000`
+
+## Program Instructions
+
+### Initialize
+Creates a new todo list for a user
+```typescript
+await program.methods
+  .initialize()
+  .accounts({...})
+  .rpc();
+```
+
+### Add Task
+Adds a new task to the list
+```typescript
+await program.methods
+  .addTask(name, description)
+  .accounts({...})
+  .rpc();
+```
+
+### Complete Task
+Marks a task as complete
+```typescript
+await program.methods
+  .taskComplete(taskIndex)
+  .accounts({...})
+  .rpc();
+```
+
+## Error Codes
+
+- `NameTooLong`: Task name exceeds 20 characters
+- `NameTooShort`: Task name less than 4 characters
+- `NameAlreadyExists`: Duplicate task name
+- `DescriptionTooLong`: Description exceeds 180 characters
+- `TaskNotFound`: Invalid task index
+- `MaxTasksReached`: Exceeded 10 tasks limit
+- `TaskAlreadyCompleted`: Task already marked complete
+- `InsufficientFunds`: Not enough SOL to create todo list
+
+## Security Considerations
+
+- PDA-based account creation
+- Owner-only task management
+- Input validation
+- Space limitation checks
+- Duplicate name prevention
+
+## Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Commit changes
+4. Push to branch
+5. Create Pull Request
+
+## License
+
+This project is licensed under the MIT License.
